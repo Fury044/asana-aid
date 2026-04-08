@@ -37,8 +37,15 @@ export default function PlanGeneration() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userId: userId,
-            conditions: userData.medicalConditions || userData.healthConditions || [],
-            goals: userData.goals || []
+            conditions: userData.healthConditions || userData.medicalConditions || [],
+            goals: userData.goals || [],
+            profile: {
+                age: userData.age,
+                weight: userData.weight,
+                height: userData.height,
+                gender: userData.gender,
+                experience_level: userData.experience
+            }
           })
         });
 

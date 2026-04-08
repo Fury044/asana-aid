@@ -18,6 +18,11 @@ export const signup = async (req: Request, res: Response) => {
       [email, passwordHash, full_name]
     );
     const user = result.rows[0];
+    
+    // Auto-create initial profile and streak records
+    await pool.query('INSERT INTO user_health_profiles (user_id) VALUES ($1)', [user.id]);
+    await pool.query('INSERT INTO streaks (user_id) VALUES ($1)', [user.id]);
+
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
     res.status(201).json({ user, token });
   } catch (error: any) {

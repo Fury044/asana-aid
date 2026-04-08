@@ -16,12 +16,21 @@ export const updateProfile = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { age, weight, height, gender, experience_level } = req.body;
   try {
-    const result = await pool.query(
-      'UPDATE user_health_profiles SET age = $1, weight = $2, height = $3, gender = $4, experience_level = $5, updated_at = CURRENT_TIMESTAMP WHERE user_id = $6 RETURNING *',
-      [age, weight, height, gender, experience_level, id]
-    );
+    const result = await pool.query(`
+      INSERT INTO user_health_profiles (user_id, age, weight, height, gender, experience_level, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+      ON CONFLICT (user_id) DO UPDATE SET 
+        age = EXCLUDED.age, 
+        weight = EXCLUDED.weight, 
+        height = EXCLUDED.height, 
+        gender = EXCLUDED.gender, 
+        experience_level = EXCLUDED.experience_level, 
+        updated_at = EXCLUDED.updated_at
+      RETURNING *
+    `, [id, age, weight, height, gender, experience_level]);
     res.json(result.rows[0]);
   } catch (error) {
+    console.error("Profile Update Error:", error);
     res.status(500).json({ message: 'Error updating profile', error });
   }
 };

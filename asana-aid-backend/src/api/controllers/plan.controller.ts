@@ -3,9 +3,9 @@ import { generatePlan } from '../../services/plan.service.js';
 import pool from '../../database/db.js';
 
 export const createPlan = async (req: Request, res: Response) => {
-  const { userId, conditions, goals } = req.body;
+  const { userId, conditions, goals, profile } = req.body;
   try {
-    const plan = await generatePlan(userId, conditions, goals);
+    const plan = await generatePlan(userId, conditions, goals, profile);
     res.status(201).json(plan);
   } catch (error) {
     res.status(500).json({ message: 'Error generating plan', error });
