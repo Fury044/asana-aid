@@ -190,12 +190,12 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
   let sessionId = `mock_session_${Date.now()}`;
 
   try {
-    const planResult = await pool.query('INSERT INTO user_plans (user_id, is_active) VALUES ($1, true) RETURNING id', [userId]);
+    const planResult = await pool.query('INSERT INTO user_plans (user_id, is_active, plan_config) VALUES ($1, true, $2) RETURNING id', [userId, JSON.stringify({ conditions, goals })]);
     planId = planResult.rows[0].id;
 
     const sessionResult = await pool.query(
-      'INSERT INTO yoga_sessions (program_id, title, difficulty) VALUES (NULL, $1, $2) RETURNING id',
-      [`Daily Session for ${userProfile.full_name}`, userProfile.experience_level]
+      'INSERT INTO yoga_sessions (program_id, plan_id, title, difficulty) VALUES (NULL, $1, $2, $3) RETURNING id',
+      [planId, `Daily Session for ${userProfile.full_name}`, userProfile.experience_level]
     );
     sessionId = sessionResult.rows[0].id;
 

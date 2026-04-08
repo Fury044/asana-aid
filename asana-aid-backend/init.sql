@@ -71,9 +71,11 @@ CREATE TABLE yoga_programs (
 CREATE TABLE yoga_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     program_id UUID REFERENCES yoga_programs(id) ON DELETE CASCADE,
+    plan_id UUID REFERENCES user_plans(id) ON DELETE CASCADE,
     title VARCHAR(100) NOT NULL,
     duration INT, -- Estimated total duration in seconds
-    difficulty VARCHAR(20)
+    difficulty VARCHAR(20),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE session_poses (
