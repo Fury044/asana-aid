@@ -131,8 +131,10 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
   const conditionToFocusMap: Record<string, string> = {
     'back pain': 'Back',
     'back pain relief': 'Back',
+    'back': 'Back',
     'navel issues': 'Navel',
     'navel correction': 'Navel',
+    'navel': 'Navel',
     'stress': 'Stress',
     'stress relief': 'Stress',
     'posture': 'Posture',
@@ -158,18 +160,23 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
     console.warn("Database poses table unreachable, using Mock Library");
   }
 
-  // FALLBACK: If DB is empty or unreachable, use Mock library
-  if (candidatePoses.length === 0) {
-    targetFocusAreas.forEach(area => {
-      const problemKey = Object.keys(conditionToFocusMap).find(k => conditionToFocusMap[k] === area);
+  // FALLBACK & ENRICHMENT: Ensure we have high-quality poses if DB is empty or lacks specific areas
+  targetFocusAreas.forEach(area => {
+    // Check if we already have enough high-quality DB poses for this area
+    const dbPosesInArea = candidatePoses.filter(p => p.focus_area === area);
+    
+    if (dbPosesInArea.length < 3) {
+      // Hydrate from Mock Library for this specific area
+      const problemKey = Object.keys(conditionToFocusMap).find(k => conditionToFocusMap[k] === area && MOCK_ASANA_LIBRARY[k]);
       if (problemKey && MOCK_ASANA_LIBRARY[problemKey]) {
+        console.log(`Hydrating ${area} from mock library due to low DB count`);
         candidatePoses = [...candidatePoses, ...MOCK_ASANA_LIBRARY[problemKey]];
       }
-    });
-
-    if (candidatePoses.length === 0) {
-      candidatePoses = MOCK_ASANA_LIBRARY['stress'] || [];
     }
+  });
+
+  if (candidatePoses.length === 0) {
+    candidatePoses = MOCK_ASANA_LIBRARY['stress'] || [];
   }
 
   // Calculate scores for each pose
