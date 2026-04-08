@@ -213,7 +213,8 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
       );
     }
   } catch (err) {
-    console.warn("Database storage failed, returning mock session data");
+    console.error("DATABASE_STORAGE_CRITICAL_FAILURE:", err);
+    console.warn("Returning mock session data due to storage failure");
   }
 
   return { planId, sessionId, poses: finalSequence };
