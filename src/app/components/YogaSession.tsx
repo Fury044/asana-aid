@@ -270,10 +270,10 @@ export default function YogaSession() {
         >
           <div className="bg-gradient-to-br from-[#5fa777] to-[#81c995] rounded-3xl p-6 mb-6 text-white text-center shadow-lg overflow-hidden relative">
             <div className="relative aspect-video bg-white/10 backdrop-blur-md rounded-2xl mb-4 flex items-center justify-center group overflow-hidden border border-white/20">
-              {/* Visual Guide - Rendering GIF from mediaUrl */}
-              {currentPose.mediaUrl ? (
+              {/* Visual Guide - Rendering GIF from media_url or mediaUrl */}
+              {(currentPose.media_url || currentPose.mediaUrl) ? (
                 <img 
-                  src={currentPose.mediaUrl} 
+                  src={currentPose.media_url || currentPose.mediaUrl} 
                   alt={currentPose.name}
                   className="w-full h-full object-cover"
                 />
@@ -352,25 +352,33 @@ export default function YogaSession() {
             <div>
               <h3 className="text-lg text-[#2d3748] mb-3">Instructions</h3>
               <div className="space-y-3">
-                {Array.isArray(currentPose.instructions) ? (
-                  currentPose.instructions.map((instruction: string, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 p-3 bg-[#f8faf9] rounded-xl"
-                    >
-                      <div className="flex-shrink-0 w-6 h-6 bg-[#5fa777] text-white rounded-full flex items-center justify-center text-sm">
-                        {index + 1}
+                {(() => {
+                  const instructionList = Array.isArray(currentPose.instructions) 
+                    ? currentPose.instructions 
+                    : (currentPose.instructions?.steps || []);
+                    
+                  if (instructionList.length > 0) {
+                    return instructionList.map((instruction: string, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-3 p-3 bg-[#f8faf9] rounded-xl"
+                      >
+                        <div className="flex-shrink-0 w-6 h-6 bg-[#5fa777] text-white rounded-full flex items-center justify-center text-sm">
+                          {index + 1}
+                        </div>
+                        <p className="text-[#2d3748] text-sm pt-0.5">
+                          {instruction}
+                        </p>
                       </div>
-                      <p className="text-[#2d3748] text-sm pt-0.5">
-                        {instruction}
-                      </p>
+                    ));
+                  }
+                  
+                  return (
+                    <div className="p-4 bg-[#f8faf9] rounded-xl text-[#718096] text-sm italic">
+                      Follow along with the visual guide...
                     </div>
-                  ))
-                ) : (
-                  <div className="p-4 bg-[#f8faf9] rounded-xl text-[#718096] text-sm italic">
-                    Follow along with the visual guide...
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             </div>
           </div>
