@@ -93,7 +93,8 @@ CREATE TABLE user_plans (
     start_date DATE DEFAULT CURRENT_DATE,
     end_date DATE,
     is_active BOOLEAN DEFAULT TRUE,
-    plan_config JSONB -- Stores the parameters used to generate the plan
+    plan_config JSONB, -- Stores the parameters used to generate the plan
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE session_progress (

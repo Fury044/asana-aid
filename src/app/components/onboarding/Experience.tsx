@@ -34,7 +34,7 @@ export default function OnboardingExperience() {
       // FINAL SYNC TO POSTGRES
       try {
           if (existingData.id) {
-              await apiFetch(`/user/${existingData.id}/profile`, {
+              await apiFetch(`/user/${existingData.id}`, { // Fixed path: REMOVED /profile
                   method: "PATCH",
                   headers: { 
                       "Content-Type": "application/json",

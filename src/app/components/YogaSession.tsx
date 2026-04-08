@@ -197,9 +197,12 @@ export default function YogaSession() {
     try {
       // 1. Persist to Backend if we have the IDs
       if (userId && sessionId) {
-        await apiFetch(`/sessions/${sessionId}/complete`, {
+        await apiFetch(`/sessions/complete/${sessionId}`, { // Fixed path: /complete/:id
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${userData.token}`
+          },
           body: JSON.stringify({ userId })
         });
         console.log("Session persisted to cloud database.");

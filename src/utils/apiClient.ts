@@ -2,7 +2,7 @@ const LOCAL_API = "http://localhost:5000/api/v1";
 const PROD_API = "https://asana-aid-production.up.railway.app/api/v1";
 
 // Point to local by default for dev, but PROD-API remains as fallback
-let activeBase = LOCAL_API;
+let activeBase = PROD_API;
 
 /**
  * Intelligent fetch wrapper that falls back to the Railway cloud server
