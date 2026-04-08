@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import OnboardingLayout from "./OnboardingLayout";
 import { Trophy } from "lucide-react";
+import { apiFetch } from "../../../utils/apiClient";
 
 const levels = [
   {
@@ -22,13 +23,37 @@ export default function OnboardingExperience() {
   const navigate = useNavigate();
   const [selectedLevel, setSelectedLevel] = useState("");
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedLevel) {
       const existingData = JSON.parse(localStorage.getItem("asanaAidUser") || "{}");
       localStorage.setItem(
         "asanaAidUser",
         JSON.stringify({ ...existingData, experience: selectedLevel })
       );
+
+      // FINAL SYNC TO POSTGRES
+      try {
+          if (existingData.id) {
+              await apiFetch(`/user/${existingData.id}/profile`, {
+                  method: "PATCH",
+                  headers: { 
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${existingData.token}`
+                  },
+                  body: JSON.stringify({
+                      age: existingData.age,
+                      weight: existingData.weight,
+                      height: existingData.height,
+                      gender: existingData.gender,
+                      experience_level: selectedLevel
+                  })
+              });
+              console.log("Health Profile officially stored in Railway Postgres");
+          }
+      } catch (err) {
+          console.error("Failed to sync profile to cloud:", err);
+      }
+
       navigate("/plan-generation");
     }
   };

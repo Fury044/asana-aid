@@ -352,19 +352,25 @@ export default function YogaSession() {
             <div>
               <h3 className="text-lg text-[#2d3748] mb-3">Instructions</h3>
               <div className="space-y-3">
-                {(currentPose.instructions || []).map((instruction: string, index: number) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 p-3 bg-[#f8faf9] rounded-xl"
-                  >
-                    <div className="flex-shrink-0 w-6 h-6 bg-[#5fa777] text-white rounded-full flex items-center justify-center text-sm">
-                      {index + 1}
+                {Array.isArray(currentPose.instructions) ? (
+                  currentPose.instructions.map((instruction: string, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 bg-[#f8faf9] rounded-xl"
+                    >
+                      <div className="flex-shrink-0 w-6 h-6 bg-[#5fa777] text-white rounded-full flex items-center justify-center text-sm">
+                        {index + 1}
+                      </div>
+                      <p className="text-[#2d3748] text-sm pt-0.5">
+                        {instruction}
+                      </p>
                     </div>
-                    <p className="text-[#2d3748] text-sm pt-0.5">
-                      {instruction}
-                    </p>
+                  ))
+                ) : (
+                  <div className="p-4 bg-[#f8faf9] rounded-xl text-[#718096] text-sm italic">
+                    Follow along with the visual guide...
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

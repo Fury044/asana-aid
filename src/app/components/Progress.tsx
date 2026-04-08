@@ -155,19 +155,42 @@ export default function Progress() {
             <h3 className="text-lg text-[#2d3748]">Insights</h3>
           </div>
           <div className="space-y-3">
-            <div className="flex items-start gap-3 p-3 bg-[#e6f4ea] rounded-xl">
-              <div className="text-2xl">📈</div>
-              <div>
-                <div className="text-sm text-[#2d3748]">
-                  You're practicing 40% more than last week!
+            {userData?.sessions > 0 ? (
+                <>
+                    <div className="flex items-start gap-3 p-3 bg-[#e6f4ea] rounded-xl">
+                        <div className="text-2xl">📈</div>
+                        <div>
+                            <div className="text-sm text-[#2d3748]">
+                                You've practiced for {userData.totalMinutes} minutes this week!
+                            </div>
+                        </div>
+                    </div>
+                    {userData.streak > 2 && (
+                        <div className="flex items-start gap-3 p-3 bg-[#e6f4ea] rounded-xl">
+                            <div className="text-2xl">🔥</div>
+                            <div>
+                                <div className="text-sm text-[#2d3748]">
+                                    Amazing {userData.streak} day streak! Consistency is key to yoga.
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            ) : (
+                <div className="flex items-start gap-3 p-3 bg-[#f8faf9] rounded-xl">
+                    <div className="text-2xl">💡</div>
+                    <div>
+                        <div className="text-sm text-[#2d3748]">
+                            Start your first session to see personalized activity insights!
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
+            )}
             <div className="flex items-start gap-3 p-3 bg-[#e6f4ea] rounded-xl">
-              <div className="text-2xl">💡</div>
+              <div className="text-2xl">✨</div>
               <div>
                 <div className="text-sm text-[#2d3748]">
-                  Best practice time: Morning (6-8 AM)
+                  Goal Focus: {(userData?.goals || []).join(", ") || "General Wellness"}
                 </div>
               </div>
             </div>

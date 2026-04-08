@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import OnboardingLayout from "./OnboardingLayout";
 import { ClipboardList } from "lucide-react";
+import { apiFetch } from "../../../utils/apiClient";
 
 export default function OnboardingMedicalHistory() {
   const navigate = useNavigate();
@@ -11,12 +12,25 @@ export default function OnboardingMedicalHistory() {
     surgeries: "",
   });
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const existingData = JSON.parse(localStorage.getItem("asanaAidUser") || "{}");
-    localStorage.setItem(
-      "asanaAidUser",
-      JSON.stringify({ ...existingData, medicalHistory: formData })
-    );
+    const updatedData = { ...existingData, medicalHistory: formData };
+    localStorage.setItem("asanaAidUser", JSON.stringify(updatedData));
+    
+    // Proactively save health conditions to DB if they select any common ones
+    try {
+        if (formData.conditions && existingData.id) {
+            await apiFetch(`/user/${existingData.id}/profile`, {
+                method: "PATCH",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${existingData.token}`
+                },
+                body: JSON.stringify({ conditions: [formData.conditions] })
+            });
+        }
+    } catch (e) { console.error("Sync failed", e); }
+    
     navigate("/onboarding/goals");
   };
 
