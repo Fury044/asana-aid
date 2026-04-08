@@ -4,16 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recha
 import { Calendar, TrendingUp, Award, Flame } from "lucide-react";
 import { apiFetch } from "../../utils/apiClient";
 
-const weeklyData = [
-  { day: "Mon", minutes: 15 },
-  { day: "Tue", minutes: 20 },
-  { day: "Wed", minutes: 0 },
-  { day: "Thu", minutes: 25 },
-  { day: "Fri", minutes: 18 },
-  { day: "Sat", minutes: 30 },
-  { day: "Sun", minutes: 22 },
-];
-
+// achievements can stay for UI but the logic should eventually be syncable too
 const achievements = [
   { name: "First Step", icon: "🎯", description: "Completed first session", unlocked: true },
   { name: "Week Warrior", icon: "💪", description: "7 days streak", unlocked: false },
@@ -23,45 +14,50 @@ const achievements = [
 
 export default function Progress() {
   const [userData, setUserData] = useState<any>(null);
+  const [weeklyActivity, setWeeklyActivity] = useState<any[]>([]);
   const [timeRange, setTimeRange] = useState("week");
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("asanaAidUser") || "{}");
     setUserData(data);
 
-    const fetchStats = async () => {
-        if (!data.id) return;
-        try {
-            setLoading(true);
-            const statsRes = await apiFetch(`/analytics/stats?userId=${data.id}`);
-            const streaksRes = await apiFetch(`/analytics/streaks?userId=${data.id}`);
-            
-            if (statsRes.ok && streaksRes.ok) {
-                const stats = await statsRes.json();
-                const streaks = await streaksRes.json();
-                
-                setUserData((prev: any) => ({
-                    ...prev,
-                    sessions: stats.completedSessions,
-                    totalMinutes: stats.totalMinutes,
-                    streak: streaks.current_streak,
-                    caloriesBurned: stats.completedSessions * 85 // Estimated
-                }));
-            }
-        } catch (err) {
-            console.error("Failed to fetch cloud stats:", err);
-        } finally {
-            setLoading(false);
+    const fetchData = async () => {
+      if (!data.id) return;
+      try {
+        setLoading(true);
+        const [statsRes, streaksRes, weeklyRes] = await Promise.all([
+          apiFetch(`/analytics/stats?userId=${data.id}`),
+          apiFetch(`/analytics/streaks?userId=${data.id}`),
+          apiFetch(`/analytics/weekly-activity?userId=${data.id}`)
+        ]);
+
+        if (statsRes.ok && streaksRes.ok && weeklyRes.ok) {
+          const stats = await statsRes.json();
+          const streaks = await streaksRes.json();
+          const weekly = await weeklyRes.json();
+
+          setUserData((prev: any) => ({
+            ...prev,
+            sessions: stats.completedSessions,
+            totalMinutes: stats.totalMinutes,
+            streak: streaks.current_streak,
+            caloriesBurned: stats.completedSessions * 85
+          }));
+          setWeeklyActivity(weekly);
         }
+      } catch (err) {
+        console.error("Failed to fetch cloud stats:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchStats();
+    fetchData();
   }, []);
 
-  const totalMinutes = weeklyData.reduce((sum, day) => sum + day.minutes, 0);
-  const avgMinutes = Math.round(totalMinutes / 7);
+  const totalMinutes = weeklyActivity.reduce((sum, day) => sum + (day.minutes || 0), 0);
+  const avgMinutes = weeklyActivity.length > 0 ? Math.round(totalMinutes / weeklyActivity.length) : 0;
 
   return (
     <div className="min-h-screen">
@@ -98,17 +94,16 @@ export default function Progress() {
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e6f4ea] mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg text-[#2d3748]">Weekly Activity</h3>
+            <h3 className="text-lg text-[#2d3748]">Last 7 Days Activity</h3>
             <div className="flex gap-2">
               {["week", "month"].map((range) => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                    timeRange === range
+                  className={`px-3 py-1 text-sm rounded-lg transition-colors ${timeRange === range
                       ? "bg-[#5fa777] text-white"
                       : "bg-[#f1f5f3] text-[#718096]"
-                  }`}
+                    }`}
                 >
                   {range.charAt(0).toUpperCase() + range.slice(1)}
                 </button>
@@ -117,9 +112,9 @@ export default function Progress() {
           </div>
 
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={weeklyData}>
+            <BarChart data={weeklyActivity}>
               <XAxis
-                dataKey="day"
+                dataKey="label"
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "#718096", fontSize: 12 }}
@@ -191,11 +186,10 @@ export default function Progress() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className={`p-4 rounded-2xl text-center ${
-                  achievement.unlocked
+                className={`p-4 rounded-2xl text-center ${achievement.unlocked
                     ? "bg-gradient-to-br from-[#5fa777] to-[#81c995] text-white"
                     : "bg-[#f1f5f3] text-[#a8d5ba]"
-                }`}
+                  }`}
               >
                 <div className="text-3xl mb-2">{achievement.icon}</div>
                 <div className="text-sm mb-1">{achievement.name}</div>

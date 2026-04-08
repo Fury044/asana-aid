@@ -41,26 +41,10 @@ export default function Login() {
         navigate("/app"); // Direct to dashboard if already onboarded
       } else {
         setError(data.message || "Login failed");
-        // Fallback for demo
-        if (formData.email && formData.password) {
-            console.warn("Backend unavailable, using demo credentials");
-            localStorage.setItem("asanaAidUser", JSON.stringify({
-                id: 'demo_user',
-                email: formData.email,
-                name: 'Demo Yogi',
-            }));
-            navigate("/app");
-        }
       }
     } catch (err) {
       console.error("Auth error:", err);
-      // Fallback for demo
-      localStorage.setItem("asanaAidUser", JSON.stringify({
-        id: 'demo_user',
-        email: formData.email,
-        name: 'Demo Yogi',
-      }));
-      navigate("/app");
+      setError("Network error: Could not connect to the cloud database. Please verify your internet connection.");
     } finally {
       setLoading(false);
     }

@@ -1,8 +1,8 @@
 const LOCAL_API = "http://localhost:5000/api/v1";
 const PROD_API = "https://asana-aid-production.up.railway.app/api/v1";
 
-// Default to checking local first if we are in development, or go straight to PROD if built for production
-let activeBase = (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') || (import.meta as any).env?.PROD ? PROD_API : LOCAL_API;
+// Hardcoded to PROD to ensure Railway cloud persistence
+let activeBase = PROD_API;
 
 /**
  * Intelligent fetch wrapper that falls back to the Railway cloud server

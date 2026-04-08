@@ -38,26 +38,10 @@ export default function Signup() {
         navigate("/onboarding/basic-info");
       } else {
         setError(data.message || "Signup failed");
-        // Fallback for demo
-        if (!response.ok) {
-            console.warn("Backend unavailable, proceeding with demo session");
-            localStorage.setItem("asanaAidUser", JSON.stringify({
-                id: 'demo_user_' + Date.now(),
-                email: formData.email,
-                name: formData.full_name,
-            }));
-            navigate("/onboarding/basic-info");
-        }
       }
     } catch (err) {
       console.error("Auth error:", err);
-      // Fallback for demo
-      localStorage.setItem("asanaAidUser", JSON.stringify({
-        id: 'demo_user_' + Date.now(),
-        email: formData.email,
-        name: formData.full_name,
-      }));
-      navigate("/onboarding/basic-info");
+      setError("Network error: Could not reach the cloud database. Please check your internet connection.");
     } finally {
       setLoading(false);
     }
