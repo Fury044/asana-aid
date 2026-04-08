@@ -62,7 +62,6 @@ async function seedData() {
                 INSERT INTO yoga_poses (id, name, difficulty_level, focus_area, media_url, base_duration, instructions)
                 VALUES ($1, $2, 'Beginner', $3, $4, 60, $5)
                 ON CONFLICT (name) DO UPDATE SET 
-                    id = EXCLUDED.id,
                     media_url = EXCLUDED.media_url,
                     focus_area = EXCLUDED.focus_area,
                     base_duration = 60
