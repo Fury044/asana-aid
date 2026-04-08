@@ -273,7 +273,6 @@ export default function YogaSession() {
         >
           <div className="bg-gradient-to-br from-[#5fa777] to-[#81c995] rounded-3xl p-6 mb-6 text-white text-center shadow-lg overflow-hidden relative">
             <div className="relative aspect-video bg-white/10 backdrop-blur-md rounded-2xl mb-4 flex items-center justify-center group overflow-hidden border border-white/20">
-              {/* Visual Guide - Rendering GIF from media_url or mediaUrl */}
               {(currentPose.media_url || currentPose.mediaUrl) ? (
                 <img 
                   src={currentPose.media_url || currentPose.mediaUrl} 
@@ -281,19 +280,24 @@ export default function YogaSession() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-40 group-hover:opacity-60 transition-opacity">
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <Flame className="w-24 h-24 text-white" />
-                    </motion.div>
-                  </div>
-                  <div className="z-10 bg-white/20 backdrop-blur-lg rounded-full p-4 border border-white/30">
-                    <Play className="w-10 h-10 text-white fill-white" />
-                  </div>
-                </>
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/5 backdrop-blur-sm">
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.05, 1],
+                      opacity: [0.6, 0.9, 0.6]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="relative"
+                  >
+                    {/* Branded Yoga Silhouette Placeholder */}
+                    <svg viewBox="0 0 100 100" className="w-32 h-32 text-white/80 fill-current">
+                       <path d="M50 20c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zM35 80c0 2.2 1.8 4 4 4s4-1.8 4-4v-15l7-7 7 7v15c0 2.2 1.8 4 4 4s4-1.8 4-4V60c0-1.1-.4-2.1-1.2-2.8L50 44.4l-13.8 12.8c-.8.7-1.2 1.7-1.2 2.8v20zM68 45c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zM32 45c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
+                    </svg>
+                    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-medium tracking-widest uppercase opacity-70">
+                      Preparing Pose...
+                    </div>
+                  </motion.div>
+                </div>
               )}
               <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-xs text-white">
                 Visual Guide
