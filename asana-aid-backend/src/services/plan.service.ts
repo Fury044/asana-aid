@@ -182,15 +182,27 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
   // Calculate scores for each pose
   const scoredPoses = candidatePoses.map((p: any) => {
     let score = 0;
-    if (targetFocusAreas.includes(p.focus_area)) score += 10;
+    // CRITICAL: High weight for correct therapeutic focus area
+    if (targetFocusAreas.includes(p.focus_area)) {
+      score += 100; // Drastic increase to prevent mismatch
+    } else {
+      score -= 50; // Penalize poses from other areas
+    }
+    
     if (goals.includes(p.goal_type)) score += 5;
     if (p.difficulty_level === userProfile.experience_level) score += 3;
     return { ...p, score };
   });
 
-  const finalSequence = scoredPoses
+  // Filter out duplicates (possible if hydrated from mock + DB) and sort
+  const uniquePoses = scoredPoses.filter((pose, index, self) =>
+    index === self.findIndex((p) => p.name === pose.name)
+  );
+
+  const finalSequence = uniquePoses
     .sort((a, b) => b.score - a.score)
-    .slice(0, 8);
+    .slice(0, 8)
+    .filter(p => p.score > 0); // Only include relevant poses
 
   // 5. Create a new User Plan (Mock IDs if DB fails)
   let planId = `mock_plan_${Date.now()}`;
