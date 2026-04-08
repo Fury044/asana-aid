@@ -6,16 +6,27 @@ import pool from '../../database/db.js';
 export const signup = async (req: Request, res: Response) => {
   const { email, password, full_name } = req.body;
   try {
+    // Check if user already exists
+    const checkUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (checkUser.rows.length > 0) {
+      return res.status(400).json({ message: 'Email already registered. Please login instead.' });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id, email',
+      'INSERT INTO users (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id, email, full_name',
       [email, passwordHash, full_name]
     );
     const user = result.rows[0];
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
     res.status(201).json({ user, token });
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating user', error });
+  } catch (error: any) {
+    console.error('SIGNUP ERROR:', error);
+    res.status(500).json({ 
+      message: 'Error creating user', 
+      detail: error.message,
+      code: error.code 
+    });
   }
 };
 
