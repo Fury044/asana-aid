@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Mail, Lock, LogIn, ArrowRight, Github } from "lucide-react";
+import { apiFetch } from "../../../utils/apiClient";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/v1/auth/login", {
+      const response = await apiFetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -31,6 +32,10 @@ export default function Login() {
           id: data.user.id,
           email: data.user.email,
           name: data.user.full_name,
+          sessions: data.user.sessions || 0,
+          streak: data.user.streak || 0,
+          planGenerated: data.user.planGenerated || false,
+          caloriesBurned: data.user.caloriesBurned || 0,
           token: data.token
         }));
         navigate("/app"); // Direct to dashboard if already onboarded

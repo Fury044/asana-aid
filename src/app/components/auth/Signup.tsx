@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Mail, Lock, User, ArrowRight, Github } from "lucide-react";
+import { apiFetch } from "../../../utils/apiClient";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function Signup() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/v1/auth/signup", {
+      const response = await apiFetch("/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

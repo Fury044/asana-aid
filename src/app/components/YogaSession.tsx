@@ -12,6 +12,7 @@ import {
   Check,
   Flame,
 } from "lucide-react";
+import { apiFetch } from "../../utils/apiClient";
 
 const poses = [
   {
@@ -92,9 +93,9 @@ export default function YogaSession() {
         
         // If we have a programId, we generate a specific plan for that program
         // mapping back-pain -> "Back Pain Relief", etc.
-        let url = `http://localhost:5000/api/v1/plans/daily/${userId}`;
+        let url = `/plans/daily/${userId}`;
         let method = "GET";
-        let body = null;
+        let body: any = null;
 
         if (programId) {
             // Map known program IDs to names
@@ -106,7 +107,7 @@ export default function YogaSession() {
                 'flexibility': 'Flexibility Flow',
                 'mood': 'Mood Boost'
             };
-            url = "http://localhost:5000/api/v1/plans/generate";
+            url = "/plans/generate";
             method = "POST";
             body = JSON.stringify({
                 userId,
@@ -114,7 +115,7 @@ export default function YogaSession() {
             });
         }
 
-        const res = await fetch(url, {
+        const res = await apiFetch(url, {
           method,
           headers: { "Content-Type": "application/json" },
           body: body
@@ -187,8 +188,27 @@ export default function YogaSession() {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const userData = JSON.parse(localStorage.getItem("asanaAidUser") || "{}");
+    const userId = userData.id;
+    const planId = userData.currentPlanId;
+    const sessionId = userData.currentSessionId;
+
+    try {
+      // 1. Persist to Backend if we have the IDs
+      if (userId && sessionId) {
+        await apiFetch(`/sessions/${sessionId}/complete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId })
+        });
+        console.log("Session persisted to cloud database.");
+      }
+    } catch (err) {
+      console.warn("Failed to persist session to backend, falling back to local storage only.", err);
+    }
+
+    // 2. Local fallback/update for instant UI feedback
     const newSessions = (userData.sessions || 0) + 1;
     const totalMinutes = (userData.totalMinutes || 0) + Math.floor(sessionPoses.reduce((sum, pose) => sum + (pose.base_duration || 60), 0) / 60);
     const calories = (userData.caloriesBurned || 0) + 85;

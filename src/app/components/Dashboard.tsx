@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Flame, Target, Clock, Play, ChevronRight } from "lucide-react";
+import { apiFetch } from "../../utils/apiClient";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost:5000/api/v1/plans/daily/${userId}`)
+    apiFetch(`/plans/daily/${userId}`)
       .then(res => {
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
         return res.json();

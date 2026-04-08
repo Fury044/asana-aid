@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { Calendar, TrendingUp, Award, Flame } from "lucide-react";
+import { apiFetch } from "../../utils/apiClient";
 
 const weeklyData = [
   { day: "Mon", minutes: 15 },
@@ -24,9 +25,39 @@ export default function Progress() {
   const [userData, setUserData] = useState<any>(null);
   const [timeRange, setTimeRange] = useState("week");
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("asanaAidUser") || "{}");
     setUserData(data);
+
+    const fetchStats = async () => {
+        if (!data.id) return;
+        try {
+            setLoading(true);
+            const statsRes = await apiFetch(`/analytics/stats?userId=${data.id}`);
+            const streaksRes = await apiFetch(`/analytics/streaks?userId=${data.id}`);
+            
+            if (statsRes.ok && streaksRes.ok) {
+                const stats = await statsRes.json();
+                const streaks = await streaksRes.json();
+                
+                setUserData((prev: any) => ({
+                    ...prev,
+                    sessions: stats.completedSessions,
+                    totalMinutes: stats.totalMinutes,
+                    streak: streaks.current_streak,
+                    caloriesBurned: stats.completedSessions * 85 // Estimated
+                }));
+            }
+        } catch (err) {
+            console.error("Failed to fetch cloud stats:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchStats();
   }, []);
 
   const totalMinutes = weeklyData.reduce((sum, day) => sum + day.minutes, 0);

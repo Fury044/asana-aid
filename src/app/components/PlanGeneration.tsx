@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Sparkles, Check } from "lucide-react";
+import { apiFetch } from "../../utils/apiClient";
 
 const steps = [
   "Analyzing your profile...",
@@ -31,7 +32,7 @@ export default function PlanGeneration() {
         const userId = userData.id || 'default_user';
 
         // Map conditions and goals for the API
-        const response = await fetch("http://localhost:5000/api/v1/plans/generate", {
+        const response = await apiFetch("/plans/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
