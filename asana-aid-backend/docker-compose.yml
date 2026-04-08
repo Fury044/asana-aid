@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: asana_aid_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: asana_aid
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build: .
+    container_name: asana_aid_backend
+    ports:
+      - "5000:5000"
+    environment:
+      DB_USER: user
+      DB_HOST: db
+      DB_NAME: asana_aid
+      DB_PASSWORD: password
+      DB_PORT: 5432
+      JWT_SECRET: supersecretkey
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
