@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { generatePlan } from '../../services/plan.service.js';
+import { generatePlan, getAllPoses } from '../../services/plan.service.js';
 import pool from '../../database/db.js';
 
 export const createPlan = async (req: Request, res: Response) => {
@@ -36,19 +36,25 @@ export const getDailyPlan = async (req: Request, res: Response) => {
       const sessionId = lastSessionRes.rows[0]?.id;
 
       if (sessionId) {
-        // Fetch the poses for this session
-        const posesRes = await pool.query(`
-          SELECT p.* 
-          FROM yoga_poses p
-          JOIN session_poses sp ON p.id = sp.pose_id 
-          WHERE sp.session_id = $1
-          ORDER BY sp.order_index ASC
+        // Fetch only the IDs and order from cloud
+        const sessionPosesRes = await pool.query(`
+          SELECT pose_id, order_index 
+          FROM session_poses 
+          WHERE session_id = $1
+          ORDER BY order_index ASC
         `, [sessionId]);
+
+        // HYDRATE: Match IDs to our local master library (backend-only)
+        const masterLibrary = getAllPoses();
+        const hydratedPoses = sessionPosesRes.rows.map((row: any) => {
+          const masterPose = masterLibrary.find(p => p.id === row.pose_id);
+          return masterPose || { id: row.pose_id, name: "Unknown Pose" };
+        });
 
         return res.json({
           planId: plan_id,
           sessionId: sessionId,
-          poses: posesRes.rows
+          poses: hydratedPoses
         });
       }
     }

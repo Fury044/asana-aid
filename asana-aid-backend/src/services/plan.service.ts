@@ -1,7 +1,7 @@
 import pool from '../database/db.js';
 
 // Expanded Mock asana library for dedicated problem solutions
-const MOCK_ASANA_LIBRARY: Record<string, any[]> = {
+export const MOCK_ASANA_LIBRARY: Record<string, any[]> = {
   'back pain': [
     {
       id: '10100000-0000-4000-8000-000000000101', name: 'Cat-Cow Stretch', base_duration: 60, focus_area: 'Back',
@@ -152,29 +152,17 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
 
   console.log("Analyzing conditions:", normalizedConditions, "Targeting focus areas:", targetFocusAreas);
 
+  // LOCAL-FIRST: Always use MOCK_ASANA_LIBRARY as the ground truth for content
   let candidatePoses: any[] = [];
-  try {
-    const posesResult = await pool.query('SELECT * FROM yoga_poses');
-    candidatePoses = posesResult.rows;
-  } catch (err) {
-    console.warn("Database poses table unreachable, using Mock Library");
-  }
-
-  // FALLBACK & ENRICHMENT: Ensure we have high-quality poses if DB is empty or lacks specific areas
   targetFocusAreas.forEach(area => {
-    // Check if we already have enough high-quality DB poses for this area
-    const dbPosesInArea = candidatePoses.filter(p => p.focus_area === area);
-    
-    if (dbPosesInArea.length < 3) {
-      // Hydrate from Mock Library for this specific area
-      const problemKey = Object.keys(conditionToFocusMap).find(k => conditionToFocusMap[k] === area && MOCK_ASANA_LIBRARY[k]);
-      if (problemKey && MOCK_ASANA_LIBRARY[problemKey]) {
-        console.log(`Hydrating ${area} from mock library due to low DB count`);
-        candidatePoses = [...candidatePoses, ...MOCK_ASANA_LIBRARY[problemKey]];
-      }
+    // Find matching poses in our local master library
+    const areaKey = Object.keys(MOCK_ASANA_LIBRARY).find(k => conditionToFocusMap[k] === area);
+    if (areaKey && MOCK_ASANA_LIBRARY[areaKey]) {
+      candidatePoses = [...candidatePoses, ...MOCK_ASANA_LIBRARY[areaKey]];
     }
   });
 
+  // Default to stress relief if no matches found
   if (candidatePoses.length === 0) {
     candidatePoses = MOCK_ASANA_LIBRARY['stress'] || [];
   }
@@ -182,27 +170,15 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
   // Calculate scores for each pose
   const scoredPoses = candidatePoses.map((p: any) => {
     let score = 0;
-    // CRITICAL: High weight for correct therapeutic focus area
-    if (targetFocusAreas.includes(p.focus_area)) {
-      score += 100; // Drastic increase to prevent mismatch
-    } else {
-      score -= 50; // Penalize poses from other areas
-    }
-    
+    if (targetFocusAreas.includes(p.focus_area)) score += 10;
     if (goals.includes(p.goal_type)) score += 5;
     if (p.difficulty_level === userProfile.experience_level) score += 3;
     return { ...p, score };
   });
 
-  // Filter out duplicates (possible if hydrated from mock + DB) and sort
-  const uniquePoses = scoredPoses.filter((pose, index, self) =>
-    index === self.findIndex((p) => p.name === pose.name)
-  );
-
-  const finalSequence = uniquePoses
+  const finalSequence = scoredPoses
     .sort((a, b) => b.score - a.score)
-    .slice(0, 8)
-    .filter(p => p.score > 0); // Only include relevant poses
+    .slice(0, 8);
 
   // 5. Create a new User Plan (Mock IDs if DB fails)
   let planId = `mock_plan_${Date.now()}`;
@@ -230,4 +206,8 @@ export const generatePlan = async (userId: string, incomingConditions: string[] 
   }
 
   return { planId, sessionId, poses: finalSequence };
+};
+
+export const getAllPoses = () => {
+  return Object.values(MOCK_ASANA_LIBRARY).flat();
 };
