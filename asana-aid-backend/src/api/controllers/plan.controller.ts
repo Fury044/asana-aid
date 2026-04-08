@@ -53,7 +53,7 @@ export const getDailyPlan = async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    console.warn("Database unreachable in getDailyPlan, falling back to instant generation");
+    console.error("GET_DAILY_PLAN_DB_ERROR:", error);
   }
 
   // FALLBACK: Generate a fresh plan (mocked if DB still fails inside generatePlan)
@@ -61,6 +61,7 @@ export const getDailyPlan = async (req: Request, res: Response) => {
     const plan = await generatePlan(userId as string);
     res.json(plan);
   } catch (genError) {
+    console.error("GET_DAILY_PLAN_FALLBACK_ERROR:", genError);
     res.status(500).json({ message: 'Critical failure in plan retrieval', error: genError });
   }
 };
