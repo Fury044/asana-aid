@@ -8,7 +8,7 @@ const POSES_TO_SEED = [
     { id: '10300000-0000-4000-8000-000000000103', name: 'Cobra Pose', focus_area: 'Back', media_url: 'https://media.post.rvohealth.io/wp-content/uploads/sites/2/2020/07/Cobra-Pose.gif' },
     { id: '10400000-0000-4000-8000-000000000104', name: 'Bridge Pose', focus_area: 'Back', media_url: 'https://media.post.rvohealth.io/wp-content/uploads/sites/2/2019/05/bridge.gif' },
     { id: '10500000-0000-4000-8000-000000000105', name: 'Downward Dog', focus_area: 'Back', media_url: 'https://media.post.rvohealth.io/wp-content/uploads/sites/2/2020/07/downward-dog.gif' },
-    
+
     // NAVEL
     { id: '20100000-0000-4000-8000-000000000201', name: 'Boat Pose (Navasana)', focus_area: 'Navel', media_url: 'https://64.media.tumblr.com/tumblr_m79mq2pFKQ1rysr6eo1_400.gifv' },
     { id: '20200000-0000-4000-8000-000000000202', name: 'Dhanurasana (Bow Pose)', focus_area: 'Navel', media_url: 'https://media.post.rvohealth.io/wp-content/uploads/sites/2/2020/07/Cobra-Pose.gif' },
@@ -66,7 +66,7 @@ async function seedData() {
                     media_url = EXCLUDED.media_url,
                     focus_area = EXCLUDED.focus_area,
                     base_duration = 60
-            `, [pose.id, pose.name, pose.focus_area, pose.media_url, JSON.stringify(["Follow visual guide for movement.", "Breath deeply.")]);
+            `, [pose.id, pose.name, pose.focus_area, pose.media_url, JSON.stringify(["Follow visual guide for movement.", "Breath deeply."])]);
         }
 
         console.log("✅ All Poses Seeded Successfully.");
