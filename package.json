@@ -73,7 +73,8 @@
     "vaul": "1.1.2"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.60.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
+    "lightningcss-linux-x64-gnu": "^1.32.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
